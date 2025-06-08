@@ -7,8 +7,8 @@ from dash import Dash, dcc, html
 app = Dash(__name__)
 
 # Load the datasets
-aus_data = pd.read_csv('solar_waste_aus.csv')
-states_data = pd.read_csv('solar_waste_aus_states.csv')
+aus_data = pd.read_csv('data/acap/solar_waste_aus.csv')
+states_data = pd.read_csv('data/acap/solar_waste_aus_states.csv')
 
 # Pivot the Australia data to have Small-Scale and Large-Scale as columns
 aus_pivot = aus_data.pivot(index='Year', columns='System_Type', values='Waste_Tonnes').reset_index()
