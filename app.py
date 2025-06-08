@@ -1,50 +1,80 @@
 import pandas as pd
-import plotly.express as px
-from dash import Dash, dcc, html, Input, Output
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+from dash import Dash, dcc, html
 
 # Initialize the Dash app
-app = Dash(__name__, title="Solar Panel Waste Projection Dashboard")
+app = Dash(__name__)
 
-# Explicitly define server for Gunicorn
-server = app.server
+# Load the datasets
+aus_data = pd.read_csv('data/acap/solar_waste_aus.csv')
+states_data = pd.read_csv('data/acap/solar_waste_aus_states.csv')
 
-# Load data
-df = pd.read_csv('data/acap/solar_waste_aus.csv')
+# Pivot the Australia data to have Small-Scale and Large-Scale as columns
+aus_pivot = aus_data.pivot(index='Year', columns='System_Type', values='Waste_Tonnes').reset_index()
 
-# Layout
-app.layout = html.Div([
-    html.H1("Solar Panel Waste Projections - Victoria, Australia"),
-    html.P("Interactive dashboard to visualize solar panel waste projections based on UNSW/ACAP data."),
-    dcc.Graph(id='waste-graph'),
-    dcc.Slider(
-        id='year-slider',
-        min=df['Year'].min(),
-        max=df['Year'].max(),
-        step=1,
-        value=df['Year'].min(),
-        marks={str(year): str(year) for year in df['Year'].unique()},
-        tooltip={"placement": "bottom", "always_visible": True}
+# Create the Plotly figure with secondary y-axis
+fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+# Add stacked bar traces for state-level annual waste (excluding Total column)
+states = ['ACT', 'NSW', 'NT', 'QLD', 'SA', 'TAS', 'VIC', 'WA']
+colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f']
+for state, color in zip(states, colors):
+    fig.add_trace(
+        go.Bar(
+            x=states_data['Year'],
+            y=states_data[state],
+            name=state,
+            marker_color=color,
+            opacity=0.8
+        ),
+        secondary_y=False
+    )
+
+# Add line traces for cumulative waste (Small-Scale and Large-Scale)
+fig.add_trace(
+    go.Scatter(
+        x=aus_pivot['Year'],
+        y=aus_pivot['Small-Scale'],
+        name='Small-Scale (Cumulative)',
+        line=dict(color='blue', width=3, dash='dash')
     ),
-    html.Footer("Data Source: UNSW/ACAP Study, 2024. Built for solar recycling business.")
-], style={'padding': '20px', 'fontFamily': 'Arial'})
-
-# Callback to update graph
-@app.callback(
-    Output('waste-graph', 'figure'),
-    [Input('year-slider', 'value'),
-     Input('region-filter', 'value'),
-     Input('system-type-filter', 'value')]
+    secondary_y=True
 )
-def update_graph(selected_year, selected_region, selected_system):
-    filtered_df = df[(df['Year'] <= selected_year) & 
-                     (df['Region'] == selected_region) & 
-                     (df['System_Type'] == selected_system)]
-    fig = px.line(filtered_df, x='Year', y='Waste_Tonnes', 
-                  title=f'Solar Panel Waste ({selected_region}, {selected_system})',
-                  labels={'Waste_Tonnes': 'Waste (Tonnes)'})
-    fig.update_layout(transition_duration=500)
-    return fig
+fig.add_trace(
+    go.Scatter(
+        x=aus_pivot['Year'],
+        y=aus_pivot['Large-Scale'],
+        name='Large-Scale (Cumulative)',
+        line=dict(color='red', width=3, dash='dot')
+    ),
+    secondary_y=True
+)
 
-# Run server (use for local testing)
+# Update layout
+fig.update_layout(
+    title='Solar Panel Waste in Australia: Annual by State and Cumulative by System Type (2023-2035)',
+    xaxis_title='Year',
+    yaxis_title='Annual Waste (Tonnes)',
+    yaxis2_title='Cumulative Waste (Tonnes)',
+    barmode='stack',
+    legend=dict(x=0.01, y=0.99, bgcolor='rgba(255,255,255,0.5)'),
+    template='plotly_white',
+    height=600
+)
+
+# Update axes
+fig.update_yaxes(title_text='Annual Waste (Tonnes)', secondary_y=False)
+fig.update_yaxes(title_text='Cumulative Waste (Tonnes)', secondary_y=True)
+
+# Define the Dash layout
+app.layout = html.Div([
+    html.H1('Solar Panel Waste Dashboard', style={'textAlign': 'center'}),
+    html.P('Visualizing annual solar panel waste by Australian state and cumulative waste by system type (2023-2035).', style={'textAlign': 'center'}),
+    dcc.Graph(id='solar-waste-plot', figure=fig),
+    html.P('Data Source: Solar panel waste datasets for Australia and its states.', style={'textAlign': 'center', 'fontSize': 12})
+])
+
+# Run the app (only for local development, not needed on Render)
 if __name__ == '__main__':
     app.run_server(debug=True)
