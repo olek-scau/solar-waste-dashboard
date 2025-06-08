@@ -6,7 +6,7 @@ from dash import Dash, dcc, html, Input, Output
 app = Dash(__name__, title="Solar Panel Waste Dashboard")
 
 # Load data
-df = pd.read_csv('data/solar_waste.csv')
+df = pd.read_csv('data/acap/solar_waste_aus.csv')
 
 # Layout
 app.layout = html.Div([
