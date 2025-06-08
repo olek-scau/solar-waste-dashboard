@@ -1,10 +1,19 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f8f9fa;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
 }
-h1, h3 {
-    color: #343a40;
+h1 {
+    color: #004aad;
+    text-align: center;
 }
-.dash-dropdown {
-    margin-bottom: 20px;
+p {
+    color: #333;
+    text-align: center;
+}
+footer {
+    margin-top: 20px;
+    text-align: center;
+    color: #666;
 }
