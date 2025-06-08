@@ -3,27 +3,18 @@ import plotly.express as px
 from dash import Dash, dcc, html, Input, Output
 
 # Initialize the Dash app
-app = Dash(__name__, title="Solar Panel Waste Dashboard")
+app = Dash(__name__, title="Solar Panel Waste Projection Dashboard")
+
+# Explicitly define server for Gunicorn
+server = app.server
 
 # Load data
 df = pd.read_csv('data/acap/solar_waste_aus.csv')
 
 # Layout
 app.layout = html.Div([
-    html.H1("Solar Panel Waste Projections - Australia", style={'text-align': 'center'}),
-    html.H3("Visualizing waste from small-scale and large-scale PV systems", style={'text-align': 'center'}),
-    dcc.Dropdown(
-        id='region-filter',
-        options=[{'label': region, 'value': region} for region in df['Region'].unique()],
-        value='Australia',
-        style={'width': '50%', 'margin': 'auto'}
-    ),
-    dcc.Dropdown(
-        id='system-type-filter',
-        options=[{'label': system, 'value': system} for system in df['System_Type'].unique()],
-        value='Small-Scale',
-        style={'width': '50%', 'margin': 'auto', 'margin-top': '10px'}
-    ),
+    html.H1("Solar Panel Waste Projections - Victoria, Australia"),
+    html.P("Interactive dashboard to visualize solar panel waste projections based on UNSW/ACAP data."),
     dcc.Graph(id='waste-graph'),
     dcc.Slider(
         id='year-slider',
@@ -31,9 +22,11 @@ app.layout = html.Div([
         max=df['Year'].max(),
         step=1,
         value=df['Year'].min(),
-        marks={str(year): str(year) for year in df['Year'].unique()}
-    )
-], style={'padding': '20px'})
+        marks={str(year): str(year) for year in df['Year'].unique()},
+        tooltip={"placement": "bottom", "always_visible": True}
+    ),
+    html.Footer("Data Source: UNSW/ACAP Study, 2024. Built for solar recycling business.")
+], style={'padding': '20px', 'fontFamily': 'Arial'})
 
 # Callback to update graph
 @app.callback(
