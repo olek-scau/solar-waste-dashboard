@@ -5,6 +5,7 @@ from dash import Dash, dcc, html
 
 # Initialize the Dash app
 app = Dash(__name__)
+server = app.server
 
 # Load the datasets
 aus_data = pd.read_csv('data/acap/solar_waste_aus.csv')
