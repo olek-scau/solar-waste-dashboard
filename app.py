@@ -18,7 +18,7 @@ fig = make_subplots(specs=[[{"secondary_y": True}]])
 
 # Add stacked bar traces for state-level annual waste (excluding Total column)
 states = ['ACT', 'NSW', 'NT', 'QLD', 'SA', 'TAS', 'VIC', 'WA']
-colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f']
+colors = ['#0000FF', '#87CEEB', '#000000', '#800000', '#FF0000', '#008000', '#000080', '#FFD700']
 for state, color in zip(states, colors):
     fig.add_trace(
         go.Bar(
@@ -69,10 +69,10 @@ fig.update_yaxes(title_text='Cumulative Waste (Tonnes)', secondary_y=True)
 
 # Define the Dash layout
 app.layout = html.Div([
-    html.H1('Solar Panel Waste Dashboard', style={'textAlign': 'center'}),
-    html.P('Visualizing annual solar panel waste by Australian state and cumulative waste by system type (2023-2035).', style={'textAlign': 'center'}),
+    html.H1('Solar Panel Waste in Australia', style={'textAlign': 'center'}),
+    html.P('Annual solar panel waste by state and cumulative waste by system type (2023-2035).', style={'textAlign': 'center'}),
     dcc.Graph(id='solar-waste-plot', figure=fig),
-    html.P('Data Source: Solar panel waste datasets for Australia and its states.', style={'textAlign': 'center', 'fontSize': 12})
+    html.P('Data Source: ACAP (Australian Centre of Advanced Photovoltaics).', style={'textAlign': 'center', 'fontSize': 12})
 ])
 
 # Run the app (only for local development, not needed on Render)
